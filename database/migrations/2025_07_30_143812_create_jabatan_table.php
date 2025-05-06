@@ -13,7 +13,6 @@ return new class extends Migration {
             $table->string('Eselon');
             $table->foreignId('id_unit_kerja')->references('id')->on('unit_kerja');
             $table->foreignId('id_kota_kerja')->references('id')->on('kota');
-
         });
     }
 

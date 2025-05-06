@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->string('No_Handphone');
             $table->string('NPWP');
             $table->string('Agama');
+            $table->string('Golongan');
             $table->foreignId('kota_lahir_id')->references('id')->on('kota');
             $table->foreignId('jabatan_id')->references('id')->on('jabatan');
         });

@@ -9,8 +9,8 @@ return new class extends Migration {
     {
         Schema::create('unit_kerja', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
-            $table->foreignId('kota_id')->references('id')->on('kota')->onDelete('cascade');
+            $table->string('Instansi');
+            $table->string('Kategori');
         });
     }
 
