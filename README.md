@@ -1,61 +1,58 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Technical Test Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi ini menggunakan laravel sebagai backend dari aplikasi manajemen pegawai PNS 
+## Database
+Untuk dari tabel yang diberikan saya membuat suatu struktur sebagai berikut
+![image](https://github.com/user-attachments/assets/8a970956-bc05-43ae-8848-16afbcba8a6d) <br>
+Disini dibuat suatu struktur tabel utama untuk menyimpan pegawai pns lalu yang menghubungkan ke kota untuk kota lahir dari pegawai tersebut. Lalu yang terhubung lagi ada tabel untuk jabatan yang memiliki _relation_ dengan unit kerja dan juga kota. Table tersebut dibuat seperti ini dikarenakan aplikasi ini berniatan untuk suatu jabatan bisa ditambah dari unit kerja. Seperti dari jabatan PNS, setiap instansi memiliki jabatan yang berbeda beda maka dari itu aplikasi lebih baik bisa diberikan akses untuk menambah jabatan bergantung dengan instansi pns tersebut. Lalu di tabel unit kera ada untuk kategori yang menandakan apa kategori pns tersebut apa daerah ataupun pusat. lalu untuk penempatan dari unit kerja tersebut diberikan relasi kota lagi. Meskipun begitu, dari _requirement_ yang dibutuhkan ini sebenarnya tidak terlalu  diperlukan untuk menghubungkan  jabatan dengan unit kerja. apalagi hal ini mempersulit alur dari suatu database ini. Maka dari itu, dari _requirement_ yang ada unit kerja sebaiknya dihubungkan dengan tabel pegawai langsung.<br>
+## Autentikasi
+Untuk autentikasi dilakukan menggunakan library sanctum untuk mempermudah mendapatkan suatu token. Token ini akan diverifikasi berdasarkan enum ability yang akan diberikan. Lalu akan dipasang sebagai middleware user melakukan autentikasi dengan akun apa dan rutenya ini akan berdasarkan token tersebut.
+```php
+enum TokenAbility: string
+{
+    case ACCESS_GUEST= 'access-guest';
+    case ACCESS_ADMIN = 'access-admin';
 
-## About Laravel
+}
+```
+Lalu untuk autentikasi ini terdapat dua akses yang akan dilakukan yaitu Admin dan Guest. Cara kerja guest ini adalah akan dipasang dalam front-end untuk identitas yang unik berbentuk _web fingerprint_ yang dimana web fingerprint ini akan dipakai untuk autentikasi dan didapatkan token untuk mengakses rute. Lalu untuk admin hanya terdapat username dan password (`username : admin`  `password admin`) admin ini hanya bisa dipakai oleh satu akun yang bisa mengakses untuk mengubah data yang ada.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur
+Dari requirement yang ada dibuatlah rute seperti berikut
+```
+Route::controller(AuthController::class)->group(function(){
+    Route::post('login', 'loginAdmin');
+    Route::post('loginGuest', 'loginGuest');
+});
+Route::middleware('auth:sanctum')->group(function(){
+    Route::prefix('pegawai')->group(function(){
+        Route::controller(PegawaiController::class)->group(function(){
+            Route::get( '/', 'GetAllPegawai');
+            Route::get('/filter/','GetPegawaibyFilter');
+        });
+        Route::controller(UnitKerjaController::class)->group(function(){
+            Route::get('/unitkerja', 'GetAllUnitKerja');
+        });
+        Route::controller(JabatanController::class)->group(function(){
+           Route::get('/jabatan', 'GetAllJabatan');
+           Route::post('/jabatan', 'PostJabatan');
+        });
+        Route::controller(WilayahController::class)->group(function(){
+            Route::get('/provinsi', 'GetAllProvinsi');
+            Route::get('/kota', 'GetAllKota');
+        });
+    });
+    Route::middleware('ability:' . TokenAbility::ACCESS_ADMIN->value)->group(function(){
+        Route::prefix('pegawai')->group(function(){
+            Route::controller(PegawaiController::class)->group(function(){
+                Route::post('/', 'CreatePegawai');
+                Route::put('/{NIP}', 'UpdatePegawai');
+                Route::delete('/{NIP}', 'DeletePegawai');
+            });
+        });
+    });
+});
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
