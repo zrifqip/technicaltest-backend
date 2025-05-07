@@ -17,9 +17,9 @@ enum TokenAbility: string
 ```
 Lalu untuk autentikasi ini terdapat dua akses yang akan dilakukan yaitu Admin dan Guest. Cara kerja guest ini adalah akan dipasang dalam front-end untuk identitas yang unik berbentuk _web fingerprint_ yang dimana web fingerprint ini akan dipakai untuk autentikasi dan didapatkan token untuk mengakses rute. Lalu untuk admin hanya terdapat username dan password (`username : admin`  `password admin`) admin ini hanya bisa dipakai oleh satu akun yang bisa mengakses untuk mengubah data yang ada.
 
-## Fitur
+## Fitur Aplikasi
 Dari requirement yang ada dibuatlah rute seperti berikut
-```
+```php
 Route::controller(AuthController::class)->group(function(){
     Route::post('login', 'loginAdmin');
     Route::post('loginGuest', 'loginGuest');
